@@ -14,3 +14,7 @@ wheels/
 
 # Data files
 data/
+
+# Logs
+logs/
+*.log

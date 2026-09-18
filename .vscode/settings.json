@@ -1,0 +1,11 @@
+{
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.languageServer": "Pylance",
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    }
+}
