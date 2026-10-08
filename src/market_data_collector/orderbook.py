@@ -40,7 +40,6 @@ class OrderBook:
         """
         if first_event:
             if not (event["U"] <= self.last_update_id + 1 <= event["u"]):
-                # Siccome in main.py scarto ogni evento già coperto dallo snapshot, qua è equivalente a scrivere minore di U?
                 raise OrderBookGapError(
                     f"snapshot {self.last_update_id} not covered by U={event['U']} and u={event['u']}"
                 )

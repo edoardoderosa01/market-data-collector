@@ -16,6 +16,17 @@ dependencies = [
 [project.scripts]
 market-data-collector = "market_data_collector:main"
 
+[tool.setuptools]
+packages = ["market_data_collector"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
 [build-system]
 requires = ["uv_build>=0.12.15,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

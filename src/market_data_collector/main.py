@@ -23,7 +23,7 @@ async def bootstrap_and_consume(
     symbol: str = SYMBOL, speed: int = SPEED, n_events: int = 1000
 ) -> OrderBook:
     """
-    Main function to run the market data collector.
+    Bootstrap the order book and consume events from the WebSocket.
     """
     queue: asyncio.Queue = asyncio.Queue()
     reader_task = asyncio.create_task(
@@ -77,12 +77,12 @@ async def main(symbol: str = SYMBOL, speed: int = SPEED, n_events: int = 1000) -
         try:
             await bootstrap_and_consume(symbol, speed, n_events)
         except OrderBookGapError as e:
-            logger.warning("Gap detected in order book: %s", e)
+            logger.warning(f"Gap detected in order book: {e}")
             await asyncio.sleep(1)
         except RuntimeError as e:
             attempts += 1
             backoff = min(2**attempts, MAX_BACKOFF)
-            logger.critical("Connection error: %s", e)
+            logger.critical(f"Connection error: {e}")
             await asyncio.sleep(backoff)
 
 
