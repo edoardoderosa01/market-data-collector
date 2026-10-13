@@ -26,8 +26,8 @@ SYMBOL = "BTCUSDT"
 LIMIT = 1000
 SPEED = 100  # in ms
 
-REST_URL = "https://api.binance.com/api/v3/depth"
+REST_URL = "https://fapi.binance.com/fapi/v1/depth"
 
 
 def build_ws_url(symbol: str = SYMBOL, speed: int = SPEED) -> str:
-    return f"wss://stream.binance.com:9443/ws/{symbol.lower()}@depth@{speed}ms"
+    return f"wss://fstream.binance.com/public/ws/{symbol.lower()}@depth@{speed}ms"
