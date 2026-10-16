@@ -33,9 +33,7 @@ SNAPSHOT_MAX_TRIES = 3
 SNAPSHOT_RETRY_DELAY = 1  # seconds between snapshot fetches
 
 
-async def next_message(
-    queue: asyncio.Queue, reader_task: asyncio.Task
-) -> tuple[int, int, dict]:
+async def next_message(queue: asyncio.Queue, reader_task: asyncio.Task) -> tuple[int, int, dict]:
     """
     Return the next buffered (recv_ts_ns, recv_mono_ns, event).
     Raise a StreamError if the reader died or the stream went silent.
@@ -43,14 +41,14 @@ async def next_message(
     try:
         return await asyncio.wait_for(queue.get(), timeout=QUEUE_TIMEOUT)
     except TimeoutError:
-        if reader_task.done():
-            exc = reader_task.exception()
-            if isinstance(exc, StreamError):
-                raise exc
-            raise StreamClosedError("Websocket stream ended") from exc
-        raise StreamStaleError(
-            f"No data received for {QUEUE_TIMEOUT} seconds, stream is stale"
-        )
+        pass
+    # Raised outside the except block so the TimeoutError is not chained as context.
+    if reader_task.done():
+        exc = reader_task.exception()
+        if isinstance(exc, StreamError):
+            raise exc
+        raise StreamClosedError("Websocket stream ended") from exc
+    raise StreamStaleError(f"No data received for {QUEUE_TIMEOUT} seconds, stream is stale")
 
 
 async def fetch_aligned_snapshot(symbol: str, first_update_id: int) -> dict:
@@ -84,9 +82,7 @@ async def bootstrap_and_consume(
     Runs until an error is raised; n_events stops it early (tests only).
     """
     queue: asyncio.Queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
-    reader_task = asyncio.create_task(
-        connect_to_websocket(build_ws_url(symbol, speed), queue)
-    )
+    reader_task = asyncio.create_task(connect_to_websocket(build_ws_url(symbol, speed), queue))
 
     try:
         msg = await next_message(queue, reader_task)
@@ -99,7 +95,7 @@ async def bootstrap_and_consume(
         processed = 0
 
         while True:
-            recv_ts_ns, recv_mono_ns, event = msg
+            _recv_ts_ns, _recv_mono_ns, event = msg
             if book.apply_update(event):
                 if (
                     book.bids
@@ -108,7 +104,8 @@ async def bootstrap_and_consume(
                     and max(book.bids) >= min(book.asks)
                 ):
                     raise CrossedBookError(
-                        f"Crossed book detected: max bid {max(book.bids)} >= min ask {min(book.asks)}"
+                        f"Crossed book detected: max bid {max(book.bids)} "
+                        f">= min ask {min(book.asks)}"
                     )
                 if processed == 0 and live is not None:
                     live.set()
@@ -126,9 +123,7 @@ async def bootstrap_and_consume(
             logger.debug(f"Reader task ended with {e!r}")
 
 
-async def main(
-    symbol: str = SYMBOL, speed: int = SPEED, n_events: int | None = None
-) -> None:
+async def main(symbol: str = SYMBOL, speed: int = SPEED, n_events: int | None = None) -> None:
     """
     Main function to run the market data collector.
     """

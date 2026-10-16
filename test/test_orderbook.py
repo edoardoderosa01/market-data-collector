@@ -7,9 +7,7 @@ from market_data_collector.orderbook import OrderBook, OrderBookGapError
 
 def make_book(bids=(), asks=(), last_update_id=100):
     book = OrderBook()
-    book.load_snapshot(
-        {"bids": list(bids), "asks": list(asks), "lastUpdateId": last_update_id}
-    )
+    book.load_snapshot({"bids": list(bids), "asks": list(asks), "lastUpdateId": last_update_id})
     return book
 
 
@@ -30,7 +28,7 @@ def test_event_older_than_snapshot_is_ignored():
     book = make_book(bids=[["10.0", "1"]], last_update_id=100)
     applied = book.apply_update(event(90, 99, bids=[["10.0", "9"]]))
     assert applied is False
-    assert book.bids == {Decimal("10.0"): Decimal("1")}
+    assert book.bids == {Decimal("10.0"): Decimal(1)}
     assert book.last_update_id == 100
     assert book.synced is False
 
@@ -41,7 +39,7 @@ def test_first_event_covering_snapshot_is_applied():
     assert applied is True
     assert book.synced is True
     assert book.last_update_id == 105
-    assert book.bids == {Decimal("10.0"): Decimal("1")}
+    assert book.bids == {Decimal("10.0"): Decimal(1)}
 
 
 def test_first_event_ending_exactly_at_snapshot_is_applied():
@@ -71,7 +69,7 @@ def test_pu_mismatch_is_gap_and_leaves_book_unchanged():
     with pytest.raises(OrderBookGapError):
         book.apply_update(event(107, 110, prev_final_id=104, bids=[["10.0", "5"]]))
     assert book.last_update_id == 105
-    assert book.bids == {Decimal("10.0"): Decimal("1")}
+    assert book.bids == {Decimal("10.0"): Decimal(1)}
 
 
 def test_new_snapshot_requires_new_alignment():
@@ -89,7 +87,7 @@ def test_new_snapshot_requires_new_alignment():
 def test_quantity_is_absolute_not_increment():
     book = make_book(bids=[["10.0", "1"]], last_update_id=100)
     book.apply_update(event(100, 101, bids=[["10.0", "3"]]))
-    assert book.bids[Decimal("10.0")] == Decimal("3")
+    assert book.bids[Decimal("10.0")] == Decimal(3)
 
 
 def test_zero_quantity_deletes_level():
@@ -113,5 +111,5 @@ def test_price_keys_compare_by_value_not_text():
 def test_load_snapshot_replaces_previous_state():
     book = make_book(bids=[["10.0", "1"]], last_update_id=100)
     book.load_snapshot({"bids": [["20.0", "2"]], "asks": [], "lastUpdateId": 200})
-    assert book.bids == {Decimal("20.0"): Decimal("2")}
+    assert book.bids == {Decimal("20.0"): Decimal(2)}
     assert book.last_update_id == 200

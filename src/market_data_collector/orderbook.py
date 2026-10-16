@@ -24,12 +24,8 @@ class OrderBook:
         """
         Load and substitute the order book snapshot from the REST API.
         """
-        self.bids = {
-            Decimal(price): Decimal(quantity) for price, quantity in snapshot["bids"]
-        }
-        self.asks = {
-            Decimal(price): Decimal(quantity) for price, quantity in snapshot["asks"]
-        }
+        self.bids = {Decimal(price): Decimal(quantity) for price, quantity in snapshot["bids"]}
+        self.asks = {Decimal(price): Decimal(quantity) for price, quantity in snapshot["asks"]}
         self.last_update_id = snapshot["lastUpdateId"]
         self.synced = False
 
@@ -59,9 +55,7 @@ class OrderBook:
                     f"does not cover snapshot {self.last_update_id}"
                 )
         elif event["pu"] != self.last_update_id:
-            raise OrderBookGapError(
-                f"expected pu={self.last_update_id}, got pu={event['pu']}"
-            )
+            raise OrderBookGapError(f"expected pu={self.last_update_id}, got pu={event['pu']}")
         for price, qty in event["b"]:
             self._update_side(self.bids, price, qty)
         for price, qty in event["a"]:
